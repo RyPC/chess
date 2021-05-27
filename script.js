@@ -2,6 +2,7 @@ var board = [];
 var selected = [];
 var numSelected = 0;
 var turn = "white";
+var turnNum = 1;
 
 
 function load() {
@@ -222,13 +223,23 @@ function move(r1, c1, r2, c2) {
         
         board[r1][c1].enP = turnedEnP ? true : false;
         
+
+        
+        //move
+        var takes = board[r2][c2];
         board[r2][c2] = board[r1][c1];
         board[r1][c1] = null;
         if (enPTaken) {
             board[r2 - color][c2] = null;
         }
+                
         turn = turn === "white" ? "black" : "white";
+        turnNum++;
+        
+        //log the move
+        logMove(r1, c1, r2, c2, board[r2][c2].piece, takes);
         document.getElementById("turn").innerHTML = turn === "white" ? "White's Turn" : "Black's Turn";
+        document.getElementById("turn").style.color = turn;
         return;
     }
 }
@@ -238,7 +249,65 @@ function reset() {
     window.location.reload();
 }
 
+function checkCheck(color, row, col) {
+    "use strict";
+    var oppColor = color === "white" ? "black" : "white";
+    if (color === "white") {
+        for (var i = row; i < 8; i++) {
+            if (board[i][col] === null) {
+                continue;
+            }
+            else if (board[i][col].color === oppColor && (board[i][col].piece === "Q" || board[i][col].piece === "R")) {
+                return true;
+            }
+            else {
+                break;
+            }
+        }
+        for(i = row; i >= 0; i++) {
+            if (board[i][col] === null) {
+                continue;
+            }
+            else if (board[i][col].color === oppColor && (board[i][col].piece === "Q" || board[i][col].piece === "R")) {
+                return true;
+            }
+            else {
+                break;
+            }
+        }
+    }
+    else/*color === "black"*/ {
+        
+    }
+    return false;
+}
+
+function coordsToMove(row, col) {
+    "use strict";
+    
+    var letter = (col + 10).toString(18);
+    
+    return letter + (8 - row).toString();
+}
+
+function logMove(r1, c1, r2, c2, piece, takes) {
+    "use strict";
+    
+    var check = checkCheck(board[r2][c2].color, r2, c2);
+    
+    var log = `<div style="color: ${turn}; background-color: ${turn === "white" ? "#999" : "#666"};">${turnNum}. ${coordsToMove(r1, c1)}`;
+    if (takes) {
+        log+= "x";
+    }
+    log+= coordsToMove(r2, c2);
+    if (check) {
+        log+= "+";
+    }
+    log+= "</div>";
+    document.getElementById("log").innerHTML+= log;
+}
 
 
-
-
+/*
+random comment
+*/
